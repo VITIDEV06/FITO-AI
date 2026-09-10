@@ -1,56 +1,119 @@
-# Modelo de datos de FITOAI
+# Modelo de datos de FitoIA
 
-## Almacenamiento actual
+Todo vive en SQLite, en el teléfono. Migraciones incrementales en
+`apps/mobile/src/storage/schema.ts`. Los tipos canónicos están en
+`packages/core/src/types/`.
 
-FITOAI guarda observaciones en `data/observaciones.json` mediante un almacenamiento local en disco. No hay base de datos remota ni backend externo.
+## `observations`
 
-## Estructura de una observación
+Una observación de campo y su análisis.
 
-```json
+```ts
 {
-  "id": "abc123",
-  "fecha": "2026-09-10T14:28:46.479Z",
-  "textoOriginal": "Las hojas de mis tomates están amarillas y algunas tienen manchas.",
-  "cultivo": "Tomate",
-  "observacion": "Las hojas de mis tomates están amarillas y algunas tienen manchas.",
-  "analisis": {
-    "cultivo": "Tomate",
-    "sintomas": ["Hojas amarillentas", "Manchas foliares"],
-    "posiblesCausas": ["Deficiencia de nutrientes", "Estrés hídrico"],
-    "nivelCertidumbre": "medio",
-    "proximosPasos": ["Revisa el pH del suelo", "Inspecciona la planta"],
-    "informacionFaltante": ["Edad de la planta", "Condiciones de riego"],
-    "descargoResponsabilidad": "FITOAI proporciona orientación basada en la información disponible y no sustituye la evaluación de un especialista agrícola."
-  },
-  "metadata": {
-    "imagen": false,
-    "tipo": "analisis"
+  id, creadoEn, actualizadoEn,
+  descripcion,                    // lo que dijo el agricultor, sin transformar
+  cultivo,
+  fotoUri,                        // fichero en el directorio privado de la app
+  transcripcion,                  // solo si el origen fue voz
+  origen: 'texto'|'voz'|'foto'|'foto+texto',
+  nivelMotor,                     // qué nivel produjo el análisis
+  notas,                          // seguimiento posterior del agricultor
+  analisis: Analisis | null
+}
+```
+
+## `Analisis`
+
+Forma canónica, **una sola nomenclatura** (camelCase). El prototipo emitía
+además una copia en snake_case; esa redundancia se eliminó.
+
+```ts
+{
+  cultivo,
+  sintomas: string[],
+  posiblesCausas: { descripcion, confianza? }[],
+  nivelCertidumbre: 'bajo'|'medio'|'alto',
+  proximosPasos: string[],
+  informacionFaltante: string[],
+  preguntasSeguimiento: string[],
+  descargoResponsabilidad,        // fuente única en core/messages.ts
+  origen: 'modelo'|'conocimiento'|'mixto'|'fallback',
+  seguridad: {
+    contenidoSuprimido: boolean,
+    suprimidosPorCampo: Record<string, number>,
+    aviso?: string
   }
 }
 ```
 
-## Campos clave
+`origen` permite decirle al usuario de dónde sale la respuesta.
+`seguridad` hace visible lo que el filtro eliminó, en vez de suprimirlo en
+silencio.
 
-- `id`: identificador único,
-- `fecha`: fecha ISO,
-- `textoOriginal`: observación del usuario,
-- `cultivo`: cultivo principal,
-- `observacion`: copia del texto original,
-- `analisis`: contenido estructurado del análisis,
-- `metadata`: datos útiles de contexto.
+## `knowledge`
 
-## Análisis generado
+Base agrícola con procedencia. **Solo `status: 'verified'` es conocimiento
+oficial.**
 
-El análisis incluye:
+```ts
+{
+  id, crop, aliases[], problem,
+  symptoms[], causes[], favorableConditions[],
+  severity: 'baja'|'media'|'alta'|'desconocida',
+  management[], prevention[], followUpQuestions[], missingInfo[],
+  source, sourceUrl, publicationDate, region, reviewedAt,
+  confidence,                     // 0..1
+  status: 'verified'|'unverified'|'synthetic'|'demo'
+}
+```
 
-- `cultivo`
-- `sintomas`
-- `posiblesCausas`
-- `nivelCertidumbre`
-- `proximosPasos`
-- `informacionFaltante`
-- `descargoResponsabilidad`
+El seed embarcado (`assets/seed/seed.synthetic.json`) tiene todos sus registros
+en `synthetic` con `confidence: 0.25` y sin fuente: es material de demostración
+creado para el prototipo, **no conocimiento agronómico verificado**.
+
+Un registro sintético no sube el nivel de certidumbre de un análisis. Solo uno
+verificado lo hace.
+
+## `contributions`
+
+Aportes de usuarios. **Nacen `pending` y nunca se promueven solos.**
+
+```ts
+{
+  id, creadoEn, actualizadoEn,
+  fotoUri, observacion, crop, symptoms[],
+  descripcion, informacionAdicional,
+  source, sourceUrl, region,
+  estado: 'pending'|'validated'|'rejected'|'archived',
+  notaRevision, revisadoEn
+}
+```
+
+Transiciones permitidas (`puedeTransicionar` en core):
+
+```text
+pending   → validated · rejected · archived
+validated → archived · rejected
+rejected  → pending · archived
+archived  → pending
+```
+
+Nada salta directo a `validated` sin pasar por revisión, y ningún estado
+transiciona a sí mismo.
+
+## `model_registry`
+
+Estado del gestor de descargas.
+
+```text
+ausente · no_soportado · verificando · descargando · parcial · listo · error
+```
+
+`parcial` existe porque `downloadAsset` de QVAC conserva los trozos ya
+descargados: la UI ofrece reanudar en vez de empezar de cero.
 
 ## Regla de negocio
 
-La inferencia nunca debe interpretarse como diagnóstico definitivo. La respuesta debe combinar un análisis útil con mensajes de precaución.
+Ningún análisis se presenta como diagnóstico. El descargo de responsabilidad
+está siempre presente y hay un test que lo verifica ante cualquier entrada,
+incluidas las degeneradas.

@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 
-const DIR_DATOS = path.join(__dirname, '..', '..', '..', 'data')
+const DIR_DATOS = path.join(__dirname, '..', '..', '..', '..', '..', 'data')
 const ARCHIVO_OBSERVACIONES = path.join(DIR_DATOS, 'observaciones.json')
 
 function garantizarDirectorio() {

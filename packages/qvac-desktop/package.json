@@ -1,0 +1,16 @@
+{
+  "name": "@fitoai/qvac-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prototipo de escritorio de FitoIA. Prueba funcional de que QVAC ejecuta inferencia local. NO es el producto: la app real es apps/mobile.",
+  "main": "src/main.js",
+  "type": "commonjs",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node tests/test_basico.js"
+  },
+  "dependencies": {
+    "@qvac/sdk": "0.19.0"
+  }
+}

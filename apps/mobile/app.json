@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "FitoIA",
+    "slug": "fitoai",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "scheme": "fitoai",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#05100B",
+    "newArchEnabled": true,
+    "icon": "./assets/branding/fitoai-app-icon.jpeg",
+    "splash": {
+      "image": "./assets/branding/fitoai-app-icon.jpeg",
+      "resizeMode": "contain",
+      "backgroundColor": "#05100B"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "io.fitoai.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/branding/fitoai-app-icon.jpeg",
+        "backgroundColor": "#05100B"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "io.fitoai.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "FitoIA usa la cámara para que puedas fotografiar tus cultivos. Las fotos se analizan en tu teléfono y nunca salen de él.",
+        "NSMicrophoneUsageDescription": "FitoIA usa el micrófono para que puedas describir hablando lo que observas. El audio se procesa en tu teléfono.",
+        "NSPhotoLibraryUsageDescription": "FitoIA necesita acceso a tus fotos para analizar imágenes de cultivos que ya tengas guardadas."
+      }
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-camera", { "cameraPermission": "FitoIA usa la cámara para fotografiar tus cultivos. Las fotos no salen de tu teléfono." }],
+      ["expo-image-picker", { "photosPermission": "FitoIA analiza fotos de cultivos de tu galería, en tu propio dispositivo." }],
+      ["expo-audio", { "microphonePermission": "FitoIA transcribe tu voz en el teléfono, sin enviarla a ningún servidor." }],
+      "expo-sqlite",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/branding/fitoai-app-icon.jpeg",
+          "backgroundColor": "#05100B",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

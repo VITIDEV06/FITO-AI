@@ -1,0 +1,287 @@
+{
+  "version": 1,
+  "defaultStatus": "synthetic",
+  "registros": [
+    {
+      "id": "synthetic:tomate",
+      "crop": "tomate",
+      "aliases": [
+        "tomates",
+        "tomato",
+        "jitomate"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Hojas amarillentas",
+        "Manchas foliares",
+        "Marchitez",
+        "Crecimiento lento"
+      ],
+      "causes": [
+        "Deficiencia de nutrientes",
+        "Estrés hídrico",
+        "Problemas de pH del suelo",
+        "Enfermedades foliares"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Revisa la humedad del suelo",
+        "Inspecciona el envés de las hojas",
+        "Verifica si la planta presenta crecimiento desigual",
+        "Compara síntomas entre hojas nuevas y viejas"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿Las hojas amarillas están en la parte superior o inferior de la planta?",
+        "¿Han cambiado los riegos recientemente?",
+        "¿Hay manchas o pudrición en el tallo?"
+      ],
+      "missingInfo": [
+        "Edad de la planta",
+        "Días desde que aparecieron los síntomas",
+        "Estado del suelo y riego"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    },
+    {
+      "id": "synthetic:maiz",
+      "crop": "maíz",
+      "aliases": [
+        "maiz",
+        "maizales"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Hojas dobladas",
+        "Manchas marrones",
+        "Pérdida de vigor",
+        "Hojas con bordes secos"
+      ],
+      "causes": [
+        "Estrés por humedad",
+        "Deficiencia de nutrientes",
+        "Daño por calor",
+        "Problemas de suelo o drenaje"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Revisa la humedad del suelo y el drenaje",
+        "Observa si la afectación avanza en filas",
+        "Inspecciona el estado general del follaje",
+        "Revisa si hay áreas con mayor compactación del suelo"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿El daño se presenta en varias plantas o solo en algunas filas?",
+        "¿La zona ha tenido exceso o falta de agua?",
+        "¿Hay diferencias de color en las hojas nuevas y viejas?"
+      ],
+      "missingInfo": [
+        "Etapa de crecimiento",
+        "Condiciones de riego recientes",
+        "Variedad del cultivo"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    },
+    {
+      "id": "synthetic:pimenton",
+      "crop": "pimentón",
+      "aliases": [
+        "pimiento",
+        "pimentones"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Crecimiento lento",
+        "Hojas con pequeños huecos",
+        "Color pálido",
+        "Diminución del vigor"
+      ],
+      "causes": [
+        "Estrés nutricional",
+        "Daño foliar por insectos",
+        "Cambio en humedad o temperatura",
+        "Falta de uniformidad en riego"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Revisa la base del tallo y las raíces",
+        "Observa si hay daño localizado en hojas nuevas",
+        "Evalúa la uniformidad del riego",
+        "Compara el crecimiento entre plantas vecinas"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿Los huecos aparecen en hojas jóvenes o viejas?",
+        "¿Se observa movimiento de insectos cercanos?",
+        "¿La planta está recibiendo la misma cantidad de agua que las demás?"
+      ],
+      "missingInfo": [
+        "Edad de la planta",
+        "Frecuencia de riego",
+        "Si se observan plagas visibles"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    },
+    {
+      "id": "synthetic:lechuga",
+      "crop": "lechuga",
+      "aliases": [
+        "lechugas"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Hojas marchitas",
+        "Coloración pálida",
+        "Deterioro del cogollo",
+        "Crecimiento lento"
+      ],
+      "causes": [
+        "Cambio de temperatura",
+        "Falta de humedad constante",
+        "Deficiencia de nutrientes",
+        "Problemas de suelo o drenaje"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Revisa la humedad del sustrato",
+        "Observa si el daño es uniforme en todo el lote",
+        "Inspecciona la base de las plantas",
+        "Verifica si hay exceso o falta de agua"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿Las plantas reciben agua constante?",
+        "¿Hay diferencia de temperatura durante el día y la noche?",
+        "¿Las hojas nuevas se deforman más que las viejas?"
+      ],
+      "missingInfo": [
+        "Ciclo de cultivo",
+        "Temperatura ambiente",
+        "Horario y frecuencia de riego"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    },
+    {
+      "id": "synthetic:pepino",
+      "crop": "pepino",
+      "aliases": [
+        "pepinillos",
+        "pepinos"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Hojas con deformación",
+        "Moteado",
+        "Marchitez",
+        "Pérdida de vigor"
+      ],
+      "causes": [
+        "Estrés térmico",
+        "Humedad irregular",
+        "Deficiencia nutricional",
+        "Problemas de circulación del aire"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Revisa la ventilación alrededor de la planta",
+        "Observa el riego y la humedad del suelo",
+        "Inspecciona si las hojas nuevas se deforman más que las viejas",
+        "Evalúa la cantidad de luz recibida"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿Ha habido cambios de temperatura recientes?",
+        "¿La planta recibe suficiente aire y luz?",
+        "¿Las hojas más jóvenes presentan más deformación?"
+      ],
+      "missingInfo": [
+        "Horas de sol",
+        "Frecuencia de riego",
+        "Temperatura y humedad ambiente"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    },
+    {
+      "id": "synthetic:arroz",
+      "crop": "arroz",
+      "aliases": [
+        "arrozales"
+      ],
+      "problem": "",
+      "symptoms": [
+        "Hojas con coloración anormal",
+        "Marchitez",
+        "Deficiencia en tallos",
+        "Diferencias de vigor"
+      ],
+      "causes": [
+        "Humedad irregular",
+        "Problemas de suelo",
+        "Deficiencia de nutrientes",
+        "Estrés por temperatura"
+      ],
+      "favorableConditions": [],
+      "severity": "desconocida",
+      "management": [
+        "Verifica el nivel de agua del lote",
+        "Inspecciona el estado del suelo y el drenaje",
+        "Comparte si el patrón afecta algunas zonas más que otras",
+        "Observa el nivel de crecimiento del tallo"
+      ],
+      "prevention": [],
+      "followUpQuestions": [
+        "¿La afectación es puntual o se observa en varias parcelas?",
+        "¿Ha habido cambios recientes en inundación o drenaje?",
+        "¿La zona está más saturada o más seca que antes?"
+      ],
+      "missingInfo": [
+        "Nivel de agua del lote",
+        "Etapa del cultivo",
+        "Estado del drenaje"
+      ],
+      "source": null,
+      "sourceUrl": null,
+      "publicationDate": null,
+      "region": null,
+      "reviewedAt": null,
+      "confidence": 0.25,
+      "status": "synthetic"
+    }
+  ]
+}

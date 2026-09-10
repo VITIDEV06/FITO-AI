@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 
-const RUTA_CONOCIMIENTO = path.join(__dirname, '..', '..', '..', 'data', 'conocimiento_agricola.json')
+const RUTA_CONOCIMIENTO = path.join(__dirname, '..', '..', '..', '..', '..', 'data', 'conocimiento_agricola.json')
 
 function cargarConocimiento() {
   try {

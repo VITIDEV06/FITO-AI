@@ -4,7 +4,31 @@ node_modules/
 .venv/
 __pycache__/
 *.pyc
-data/observaciones.json
-data/adjuntos/
 logs/
 *.log
+
+# Datos locales del prototipo de escritorio
+data/observaciones.json
+data/adjuntos/
+
+# Compilación de packages
+packages/*/dist/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+apps/mobile/android/
+apps/mobile/ios/
+apps/mobile/.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Modelos de IA descargados: nunca al repositorio
+*.gguf
+*.bin
+.qvac/
