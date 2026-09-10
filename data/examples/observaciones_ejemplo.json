@@ -1,0 +1,17 @@
+[
+  {
+    "texto": "Las hojas de mis tomates están amarillas y algunas tienen manchas.",
+    "cultivo": "Tomate",
+    "descripcion": "Síntomas foliares comunes en tomate"
+  },
+  {
+    "texto": "Las hojas de mis plantas están caídas desde hace tres días.",
+    "cultivo": "",
+    "descripcion": "Caída de hojas sin cultivo especificado"
+  },
+  {
+    "texto": "Las hojas tienen pequeños agujeros y he visto insectos cerca.",
+    "cultivo": "",
+    "descripcion": "Daño por insectos"
+  }
+]

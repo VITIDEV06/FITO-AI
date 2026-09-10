@@ -1,0 +1,15 @@
+# User Taste Profile
+- Prefers Spanish for all interactions and reports. Confidence: 0.95
+- Wants practical, structured reports with predefined sections/deliverables (e.g., "Lo que tenemos", "Lo que funciona", "Lo que está roto", etc.). Confidence: 0.85
+- Requires a thorough audit/assessment phase before any code changes. Confidence: 0.95
+- Explicitly forbids modifying files during the audit/reconnaissance phase. Confidence: 0.95
+- Wants a clear, phased implementation plan before execution. Confidence: 0.85
+- Prioritizes rapid, realistic delivery suited for hackathons or time-constrained projects. Confidence: 0.80
+- Strongly prefers reusing existing, correctly implemented code over rewriting from scratch. Confidence: 0.90
+- Dislikes mock implementations, placeholder APIs, fake buttons, and pre-determined AI responses. Confidence: 0.95
+- Wants bad, duplicated, or unnecessary code to be identified and explained before it is changed or removed. Confidence: 0.90
+- Expects architecture decisions to be justified; if a feature isn't technically feasible, prefers a clear statement and realistic alternative. Confidence: 0.85
+- Insists on verifying actual SDK/runtime capabilities, versions, and platform compatibility before integration. Confidence: 0.85
+- Demands evidence-based verification: exact API/model names, version-specific behavior, and source locations must be cited; no invented APIs or parameters. Confidence: 0.95
+- Wants technical findings classified by certainty (e.g., confirmed / probable / incorrect / unavailable / requires different architecture). Confidence: 0.85
+- Expects concrete, actionable product/architecture recommendations at the end of analysis or audit reports. Confidence: 0.85

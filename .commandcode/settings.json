@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(cd \"C:\\Dev\\Projects\\RETO # 3\\agrosense\" && del /f requirements.txt 2>nul || rm -f requirements.txt 2>/dev/null; ls requirements.txt 2>&1 || echo \"eliminado\")",
+      "Shell(cd \"C:\\Dev\\Projects\\RETO # 3\\agrosense\" && del /f /q requirements.txt obs.json 2>nul; rmdir /s /q .venv 2>nul; echo done)",
+      "Shell(cd \"C:\\Dev\\Projects\\RETO # 3\\agrosense\" && rmdir /s /q src\\core\\models 2>nul; if exist src\\__init__.py del /f src\\__init__.py 2>nul; if exist src\\core\\__init__.py del /f src\\core\\__init__.py 2>nul; echo \"listo\")",
+      "Shell(cd:*)",
+      "Shell(for:*)",
+      "Shell(src__pycache__:*)",
+      "Shell(do:*)",
+      "Shell(if:*)",
+      "Shell(dir:*)",
+      "Shell(cd \"C:\\Dev\\Projects\\RETO # 3\\agrosense\" && rmdir /s /q src\\__pycache__ 2>nul && rmdir /s /q src\\core\\__pycache__ 2>nul && rmdir /s /q src\\ui\\publico\\__pycache__ 2>nul && rmdir /s /q src\\core\\models 2>nul && del /f src\\__init__.py 2>nul && del /f src\\core\\__init__.py 2>nul && echo LISTO)",
+      "Shell(rmdir:*)",
+      "Shell(del:*)",
+      "Shell(cd \"C:\\Dev\\Projects\\RETO # 3\\agrosense\" && rmdir /s /q src\\core\\models 2>nul && echo ok)",
+      "Shell(node -c src/main.js)",
+      "Shell(node -c src/ui/publico/app.js)",
+      "Shell(node -c src/features/observation/almacen.js)",
+      "Shell(node -c src/core/models/modelos.js)",
+      "Shell(timeout 8 node src/main.js 2 >& 1)",
+      "Shell(node src/main.js 2 >& 1)",
+      "Shell(/t:*)",
+      "Shell(taskkill /f /im node.exe 2>nul; echo \"KILLED\")",
+      "Shell(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Write-Host 'Done'\")",
+      "Shell(node src/main.js)",
+      "Shell(sleep:*)",
+      "Shell(taskkill /f /im node.exe 2>nul; echo done)",
+      "powershell"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}
