@@ -60,7 +60,10 @@ export default function Conocimiento() {
 
   return (
     <SafeAreaView style={estilos.raiz} edges={['top']}>
-      <Cabecera titulo="Aportar conocimiento" />
+      <Cabecera
+        titulo="Aportar conocimiento"
+        accion={{ icono: 'shield-checkmark-outline', etiqueta: 'Cola de validación', onPress: () => router.push('/knowledge/validar') }}
+      />
 
       {aportes && aportes.length === 0 ? (
         <EstadoVacio

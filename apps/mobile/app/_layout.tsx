@@ -91,6 +91,7 @@ export default function LayoutRaiz() {
         <Stack.Screen name="assistant/index" options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="knowledge/index" />
         <Stack.Screen name="knowledge/new" />
+        <Stack.Screen name="knowledge/validar" />
       </Stack>
     </SafeAreaProvider>
   );

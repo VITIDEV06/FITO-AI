@@ -6,13 +6,14 @@ Demostrar que una observación agrícola puede analizarse localmente con QVAC, s
 
 ## Flujo del usuario
 
-1. El usuario escribe una observación del campo.
+1. El usuario escribe, dicta o fotografía una observación del campo.
 2. Puede indicar o no el cultivo.
-3. La app envía la observación al backend local.
-4. El backend prepara el contexto agrícola local.
-5. El motor QVAC ejecuta la inferencia en el dispositivo.
-6. FITOAI devuelve un análisis estructurado.
-7. La observación se guarda en el historial local.
+3. `MotorInferencia` (en el propio teléfono, sin red) resuelve el mejor motor
+   disponible: `MotorKB` sobre la base de conocimiento local, o `MotorQvacMobile`
+   con QVAC si el dispositivo lo soporta.
+4. El motor consulta el contexto agrícola local y ejecuta la inferencia.
+5. FitoIA devuelve un análisis estructurado y cauteloso.
+6. La observación se guarda en SQLite, en el historial local.
 
 ## Criterio de éxito del MVP
 

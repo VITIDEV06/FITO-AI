@@ -13,7 +13,7 @@ export const DESCARGO_RESPONSABILIDAD =
   'No es un diagnóstico definitivo y no sustituye la evaluación de un ' +
   'técnico agrícola.';
 
-/** Redacción cautelosa obligatoria. Ver .opencode/rules/04-safety.md */
+/** Redacción cautelosa obligatoria. Ver docs/SAFETY.md */
 export const MENSAJES = {
   sinCultivo: 'Cultivo no identificado',
 

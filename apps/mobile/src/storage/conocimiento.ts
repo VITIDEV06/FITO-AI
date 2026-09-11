@@ -1,10 +1,11 @@
 import {
   InMemoryKnowledgeRepository,
+  type Aporte,
   type KnowledgeRepository,
   type ColeccionConocimiento,
   type RegistroConocimiento,
 } from '@fitoai/core';
-import { abrirBd, aJson, deJson } from './db';
+import { abrirBd, aJson, ahora, deJson, idNuevo } from './db';
 
 // Semilla sintética que se embarca con la app. NO es conocimiento verificado.
 import seed from '../../assets/seed/seed.synthetic.json';
@@ -99,6 +100,49 @@ export async function repositorioConocimiento(): Promise<KnowledgeRepository> {
 
 export function invalidarCacheConocimiento(): void {
   cache = null;
+}
+
+/**
+ * Convierte un aporte ya VALIDATED en un registro de la base de conocimiento.
+ *
+ * Solo se llama desde el panel de validación, después de que
+ * `cambiarEstadoAporte` haya aceptado la transición pending -> validated. El
+ * registro nace con status 'unverified': viene de un agricultor real y pasó
+ * revisión local, pero no está contrastado contra una fuente agronómica
+ * citable, así que `esConocimientoOficial()` sigue devolviendo false para él
+ * y nunca sube la certidumbre de un análisis (ver enrich.ts). Que aparezca
+ * aquí es lo que lo saca de la lista personal 'pending' y lo pone a
+ * disposición de `mejorCoincidencia` para futuros análisis.
+ */
+export async function promoverConocimientoDesdeAporte(aporte: Aporte): Promise<void> {
+  const bd = await abrirBd();
+  await bd.runAsync(
+    `INSERT INTO knowledge
+       (id, crop, aliases_json, problem, symptoms_json, causes_json, favorable_json,
+        severity, management_json, prevention_json, follow_up_json, missing_info_json,
+        source, source_url, publication_date, region, reviewed_at, confidence, status)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    idNuevo(),
+    aporte.crop,
+    aJson([]),
+    aporte.observacion,
+    aJson(aporte.symptoms),
+    aJson([]),
+    aJson([]),
+    'desconocida',
+    aJson([]),
+    aJson([]),
+    aJson([]),
+    aJson([]),
+    aporte.source ?? 'Aporte de agricultor, validado localmente en la app',
+    aporte.sourceUrl,
+    null,
+    aporte.region,
+    ahora(),
+    0.4,
+    'unverified',
+  );
+  invalidarCacheConocimiento();
 }
 
 export async function contarPorEstado(): Promise<Record<string, number>> {

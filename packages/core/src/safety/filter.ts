@@ -3,7 +3,7 @@ import type { ResumenSeguridad } from '../types/analysis.ts';
 /**
  * Filtro de seguridad agrícola.
  *
- * Regla (.opencode/rules/04-safety.md): FITOAI no recomienda productos
+ * Regla (docs/SAFETY.md): FITOAI no recomienda productos
  * químicos, dosis ni aplicaciones. Apoya la observación, no la prescribe.
  *
  * Correcciones respecto al prototipo de escritorio:

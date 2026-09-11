@@ -101,6 +101,13 @@ archived  → pending
 Nada salta directo a `validated` sin pasar por revisión, y ningún estado
 transiciona a sí mismo.
 
+La transición a `validated` ocurre solo desde el panel de validación
+(`app/knowledge/validar.tsx`) y dispara `promoverConocimientoDesdeAporte()`,
+que inserta un registro nuevo en `knowledge` con `status: 'unverified'` (nunca
+`'verified'`: pasó revisión local, no contraste contra fuente agronómica
+citable). Es lo único que saca un aporte de la lista personal `pending` y lo
+pone a disposición de `mejorCoincidencia` para futuros análisis.
+
 ## `model_registry`
 
 Estado del gestor de descargas.

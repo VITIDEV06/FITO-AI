@@ -29,39 +29,20 @@ de conocimiento local. Eso incluye emuladores, donde QVAC nunca podrá cargar.
 `src/inference/registro.ts` elige el nivel al arrancar y degrada solo. La app
 nunca muestra un muro por tener el teléfono equivocado.
 
-## Activar QVAC (niveles 1-3)
+## QVAC (niveles 1-3)
 
-Los addons nativos de QVAC pesan más de 1,5 GB, por eso **no** están en
-`dependencies`: harían insoportable el primer `npm install` de algo que ya
-funciona sin ellos.
+QVAC ya está instalado y configurado en este repositorio: `@qvac/sdk`,
+`react-native-bare-kit`, `bare-rpc` y `bare-pack` están en `dependencies`, el
+plugin `@qvac/sdk/expo-plugin` está en `app.json`, y `qvac.config.json` declara
+los tres addons activos (completion, transcripción, TTS). Un `npm install` +
+`npx expo prebuild --clean` + `npx expo run:android --device` normal ya
+compila con QVAC dentro.
 
-```bash
-npm run qvac:install
-```
-
-Después, en `app.json`, añade a `plugins`:
-
-```json
-["expo-build-properties", { "android": { "minSdkVersion": 31 } }],
-"@qvac/sdk/expo-plugin"
-```
-
-Y crea `qvac.config.json` en `apps/mobile/`:
-
-```json
-{
-  "plugins": [
-    "@qvac/sdk/llamacpp-completion/plugin",
-    "@qvac/sdk/whispercpp-transcription/plugin",
-    "@qvac/sdk/tts-ggml/plugin"
-  ]
-}
-```
-
-Finalmente `npx expo prebuild --clean` y `npx expo run:android --device`.
-
-`src/inference/qvacSdk.ts` carga el SDK dinámicamente: si no está, devuelve
-`null` y la app sigue en Nivel 0 sin romperse.
+`src/inference/qvacSdk.ts` carga el SDK **dinámicamente** de todas formas: si
+por lo que sea no está disponible en el runtime, `cargarSdk()` devuelve `null`
+y la app cae a Nivel 0 sin romperse. `npm run qvac:install` queda como
+referencia para reinstalar los paquetes sueltos si alguna vez se quitan de
+`package.json` para aligerar un `npm install` de solo-Nivel-0.
 
 ### Requisitos reales de QVAC en móvil
 
@@ -88,6 +69,8 @@ app/                      rutas (Expo Router)
 │   └── settings/         Estado y modelos — wireframe 08
 ├── assistant/            Asistente de voz — wireframe 05
 └── knowledge/            Aportar conocimiento
+    ├── new.tsx           Nuevo aporte (nace `pending`)
+    └── validar.tsx       Cola de validación local (`pending` → `validated`/`rejected`/`archived`)
 
 src/
 ├── components/           UI reutilizable, tokens de design/branding

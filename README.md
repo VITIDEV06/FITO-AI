@@ -18,6 +18,7 @@ Probado en un **vivo V2556 · Android 16 · arm64 · 3,70 GB de RAM**.
 | Cámara y galería nativas | ✅ Funciona |
 | Funcionamiento sin conexión | ✅ Verificado con WiFi y datos desactivados |
 | Aportes de conocimiento (siempre `pending`) | ✅ Funciona |
+| Panel de validación local (`pending` → `validated`/`rejected`/`archived`) | ✅ Funciona |
 | QVAC cargado en el dispositivo, Nivel 1 detectado | ✅ Funciona |
 | Pantalla de voz completa con sus 8 estados y fallback | ✅ Funciona |
 | Transcripción real con Whisper | ⛔ Bloqueada: el modelo no se puede descargar (ver *Limitaciones reales*) |
@@ -100,7 +101,7 @@ En el V2556 (3,70 GB) el nivel máximo es **1**: la app dice literalmente «Este
 
 ## QVAC
 
-QVAC es la capa de inferencia local. Ver `.opencode/rules/03-qvac.md` y `docs/QVAC.md`.
+QVAC es la capa de inferencia local. Ver `docs/QVAC.md`.
 
 - Soporte oficial de Expo/React Native: `@qvac/sdk` declara `react-native-bare-kit`, `expo-file-system`, `expo-device` y `expo-build-properties` como peerDependencies y publica el config plugin `@qvac/sdk/expo-plugin`.
 - Corre sobre el runtime **Bare** embebido (no Hermes) y se comunica por RPC.
@@ -154,6 +155,26 @@ Separación estricta entre conocimiento verificado y no verificado:
 - Los aportes del usuario se guardan **siempre** como `pending` y **nunca** se promueven automáticamente. Estados: `pending` → `validated` / `rejected` / `archived`.
 - La pantalla de Estado muestra el recuento de verificados frente a demostración, con un aviso explícito.
 
+### Panel de validación
+
+`app/knowledge/validar.tsx` (accesible con el icono de escudo en «Aportar
+conocimiento») es la cola de validación local que pide el punto 15/16: lista
+los aportes `pending`, muestra su detalle completo y deja **aprobar**,
+**rechazar** o **archivar**, con una nota de revisión opcional.
+
+- Aprobar llama a `cambiarEstadoAporte(id, 'validated', nota)` (que respeta la
+  máquina de estados de `packages/core/src/types/contribution.ts`) y solo
+  entonces `promoverConocimientoDesdeAporte()` inserta el registro en la tabla
+  `knowledge` — con `status: 'unverified'`, nunca `'verified'`: viene de un
+  agricultor real y pasó revisión local, pero no está contrastado contra una
+  fuente agronómica citable, así que nunca sube la certidumbre de un análisis.
+- FitoIA es offline-first y no tiene backend con roles remotos: no existe una
+  cuenta de «agrónomo» separada. Este panel es la solución local razonable
+  para la demo — cualquier persona con el teléfono en la mano puede revisar,
+  pero es una pantalla aparte de «Nuevo aporte» y ningún aporte llega a
+  `validated` sin pasar por aquí explícitamente. En un despliegue real esto se
+  ligaría a una cuenta de revisor autenticada.
+
 ---
 
 ## Privacidad
@@ -205,9 +226,17 @@ npm run android # compila e instala en el teléfono conectado
 
 ## Generar el APK
 
-Desde `apps/mobile/android`:
+Requisitos: JDK 17, Android SDK con `platform-tools`, `platforms;android-36`,
+`build-tools;36.0.0` y el NDK `29.0.14206865` (lo pide el proyecto raíz vía
+`expo-build-properties`/QVAC). `react-native-bare-kit` pide además, solo para
+sí mismo, el NDK side-by-side `27.0.12077973`; Gradle lo descarga solo la
+primera vez si `sdkmanager` ya tiene licencias aceptadas.
+
+Desde `apps/mobile`:
 
 ```bash
+npx expo prebuild --platform android --no-install
+cd android
 ./gradlew assembleRelease
 ```
 
@@ -216,6 +245,18 @@ El APK queda en:
 ```
 apps/mobile/android/app/build/outputs/apk/release/app-release.apk
 ```
+
+Build verificado en esta rama: `BUILD SUCCESSFUL`, 534 tareas, APK de 68 MB,
+firmado (`apksigner verify` → v2 OK), `io.fitoai.app` v2.0.0,
+`minSdk 29 / targetSdk 36 / compileSdk 36`, con `libbare-kit.so` (QVAC)
+empaquetado en `arm64-v8a`. Copia en [`release/FITO-AI.apk`](release/FITO-AI.apk)
+con su [`release/SHA256SUMS.txt`](release/SHA256SUMS.txt) — ver
+[`release/INSTALL.md`](release/INSTALL.md) para instalarlo. **No se ha
+podido probar en un teléfono físico dentro de esta sesión** (el entorno de
+compilación no tiene un dispositivo conectado): la verificación aquí cubre
+que el build compila, firma y empaqueta correctamente, no el arranque real
+en hardware. La sección «Estado actual» de arriba, verificada en un vivo
+V2556, corresponde a una compilación anterior de esta misma base de código.
 
 Para una compilación de depuración (con Metro):
 
@@ -276,7 +317,6 @@ Para desbloquearlo hace falta descargar el modelo desde una red que no filtre UD
 - [ ] Descargar Whisper desde una red sin filtrado P2P y verificar la transcripción real de extremo a extremo.
 - [ ] Probar el LLM y el TTS en un teléfono de 6 GB o más.
 - [ ] Visión y SmolVLM2 (**no implementado**, deliberadamente fuera de alcance).
-- [ ] Flujo de revisión y promoción de aportes (`pending` → `validated`) por parte de un agrónomo.
 - [ ] Sustituir la semilla `synthetic` por conocimiento agronómico verificado y con fuente.
 - [ ] Keystore propio y build de producción firmado.
 - [ ] iOS.

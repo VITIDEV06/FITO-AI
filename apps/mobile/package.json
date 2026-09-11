@@ -46,6 +46,6 @@
     "typescript": "^5.9.2"
   },
   "expo": {
-    "comment": "Las dependencias de QVAC NO están aquí a propósito: pesan >1,5 GB y la app funciona sin ellas en Nivel 0. Instálalas con `npm run qvac:install` cuando vayas a integrar el motor con LLM."
+    "comment": "Las dependencias de QVAC (@qvac/sdk, react-native-bare-kit, bare-rpc, bare-pack, expo-device) ya están en dependencies: pesan >1,5 GB pero la app sigue funcionando sin ellas en Nivel 0 (qvacSdk.ts las carga con import() dinámico y cae a null si no están disponibles en el runtime). `npm run qvac:install` queda como referencia para reinstalarlas sueltas si se eliminan de package.json en el futuro."
   }
 }

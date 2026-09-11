@@ -8,7 +8,7 @@ import { CERTIDUMBRE, ORIGEN } from '../services/formato';
 /**
  * Presentación del análisis.
  *
- * Regla de producto no negociable (.opencode/rules/04-safety.md): nunca se
+ * Regla de producto no negociable (docs/SAFETY.md): nunca se
  * afirma un diagnóstico. Los encabezados dicen "compatible con" y "posible",
  * la certidumbre es visible siempre, y el descargo cierra la pantalla.
  * El contenido ya viene filtrado por packages/core; aquí sólo se enmarca.
