@@ -9,13 +9,15 @@
     "apps/*"
   ],
   "scripts": {
+    "start": "npm run mobile",
     "test": "npm run test --workspace @fitoai/core",
     "typecheck": "npm run typecheck --workspace @fitoai/core",
     "build:core": "npm run build --workspace @fitoai/core",
     "mobile": "npm run start --workspace @fitoai/mobile",
     "android": "npm run android --workspace @fitoai/mobile",
     "seed": "node scripts/generar-seed.mjs",
-    "desktop": "node packages/qvac-desktop/src/main.js"
+    "desktop": "node packages/qvac-desktop/src/main.js",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "@types/node": "^22.20.2",
@@ -36,5 +38,10 @@
     "react-dom": "19.1.0",
     "babel-preset-expo": "~54.0.12",
     "@babel/core": "^7.25.0"
+  },
+  "dependencies": {
+    "expo": "~54.0.37",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
   }
 }

@@ -47,6 +47,15 @@ npx expo prebuild --clean
 npx expo run:android --device
 ```
 
+Una vez instalado el Development Build, el arranque diario de desarrollo es:
+
+```bash
+npm start          # desde la raíz: arranca Metro en apps/mobile (Expo Router)
+```
+
+No ejecutes comandos de `expo` en la raíz del repositorio: la raíz no es una
+app Expo y Metro debe arrancar siempre desde `apps/mobile`.
+
 Ver [apps/mobile/README.md](apps/mobile/README.md) para los niveles de servicio
 y cómo activar QVAC.
 

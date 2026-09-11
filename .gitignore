@@ -20,6 +20,12 @@ packages/*/dist/
 apps/mobile/android/
 apps/mobile/ios/
 apps/mobile/.expo/
+
+# La raíz NO es una app Expo: la app vive en apps/mobile.
+# Si alguien ejecuta expo prebuild/start en la raíz por error, que no contamine git.
+/app.json
+/android/
+/tsconfig.json
 *.jks
 *.p8
 *.p12
