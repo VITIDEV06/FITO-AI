@@ -58,7 +58,10 @@ export async function estadoDeModelos(): Promise<EstadoDescarga[]> {
       progreso: fila?.progreso ?? 0,
       bytesDescargados: fila?.bytes_descargados ?? 0,
       errorMensaje: fila?.error_mensaje ?? null,
-      bloqueo: motivoBloqueo(definicion, diagnostico.ramTotalMb, libreMb, diagnostico.motivoNoSoportado),
+      bloqueo: motivoBloqueo(definicion, diagnostico.ramTotalMb, libreMb, {
+        nivelMaximo: diagnostico.nivelMaximo,
+        motivo: diagnostico.motivoNoSoportado,
+      }),
     };
   });
 }
@@ -67,9 +70,13 @@ function motivoBloqueo(
   definicion: DefinicionModelo,
   ramMb: number,
   libreMb: number,
-  motivoDispositivo: string | null,
+  dispositivo: { nivelMaximo: number; motivo: string | null },
 ): string | null {
-  if (motivoDispositivo) return motivoDispositivo;
+  // El motivo del diagnóstico describe por qué el teléfono no llega al nivel
+  // MÁXIMO. Aplicarlo a todos los modelos bloqueaba la voz (Nivel 1, 2 GB) con
+  // el argumento del LLM (Nivel 2, 4 GB), contradiciendo a la pantalla de
+  // Estado. Solo bloquea los modelos por encima del nivel que sí soporta.
+  if (dispositivo.motivo && definicion.nivel > dispositivo.nivelMaximo) return dispositivo.motivo;
   if (ramMb > 0 && ramMb < definicion.ramMinimaMb) {
     return `Necesita ${Math.round(definicion.ramMinimaMb / 1024)} GB de memoria y este teléfono tiene ${(ramMb / 1024).toFixed(1)} GB.`;
   }
@@ -113,6 +120,30 @@ async function escribirEstado(
     cambios.error ?? null,
     ahora(),
   );
+}
+
+/**
+ * ¿Este modelo ya está descargado y verificado en el teléfono?
+ *
+ * El motor lo consulta antes de cargar nada. Es lo que separa *descargar* de
+ * *usar*: la descarga solo ocurre cuando el agricultor la pide en «Administrar
+ * modelos», nunca a mitad de una conversación. QVAC trae los modelos por una
+ * red P2P (Hyperswarm sobre UDP); si esa red está bloqueada, el worker de Bare
+ * aborta el proceso entero, y eso no se puede capturar desde JavaScript. Con
+ * esta comprobación el fallo queda confinado a la pantalla donde el usuario
+ * decidió descargar, y el asistente de voz degrada a Nivel 0 sin morir.
+ */
+export async function modeloEstaListo(id: string): Promise<boolean> {
+  try {
+    const bd = await abrirBd();
+    const fila = await bd.getFirstAsync<{ estado: string }>(
+      'SELECT estado FROM model_registry WHERE id = ?',
+      id,
+    );
+    return fila?.estado === 'listo';
+  } catch {
+    return false;
+  }
 }
 
 export interface ProgresoDescarga {

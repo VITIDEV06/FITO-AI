@@ -94,6 +94,24 @@ export function reiniciarMotor(): void {
   cargando = null;
 }
 
+/**
+ * Devuelve el motor QVAC si es el activo, o null si estamos en Nivel 0.
+ *
+ * La pantalla de voz lo necesita para cargar y liberar Whisper/TTS de forma
+ * explícita: es lo que evita tener modelos ocupando RAM cuando nadie los usa.
+ * Devolver null NO es un error, es el caso normal en teléfonos sin soporte.
+ */
+export async function obtenerMotorVoz(): Promise<MotorQvacMobile | null> {
+  const actual = await obtenerMotor();
+  return actual.motor instanceof MotorQvacMobile ? actual.motor : null;
+}
+
+/** Libera Whisper y TTS de memoria sin tocar el resto del motor. */
+export async function liberarModelosVoz(): Promise<void> {
+  const voz = await obtenerMotorVoz().catch(() => null);
+  await voz?.liberarVoz().catch(() => {});
+}
+
 function mensajeDeError(error: unknown): string {
   return error instanceof Error ? error.message : 'error desconocido';
 }

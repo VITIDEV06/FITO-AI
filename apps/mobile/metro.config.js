@@ -16,6 +16,19 @@ const raizWorkspace = path.resolve(__dirname, '..', '..');
  * `qvacSdk.ts` puede así ser un literal —lo único que Metro acepta— y la app
  * detecta en runtime si tiene el SDK real o el sustituto.
  */
+/**
+ * Raíz del servidor = la app, no el monorepo.
+ *
+ * El plugin de Gradle de React Native pasa `--entry-file` relativo a
+ * apps/mobile, pero Expo CLI resuelve las rutas relativas contra la raíz del
+ * servidor, que por defecto es la raíz del monorepo. El desajuste rompía
+ * `assembleRelease` con "Unable to resolve module ./index.js".
+ * El monorepo sigue vigilado por `watchFolders`, así que @fitoai/core resuelve
+ * igual que antes.
+ */
+config.server = { ...config.server, unstable_serverRoot: __dirname };
+config.watchFolders = [...new Set([...(config.watchFolders ?? []), raizWorkspace])];
+
 const OPCIONALES = new Map([
   ['@qvac/sdk', path.resolve(__dirname, 'src/inference/qvacAusente.ts')],
 ]);

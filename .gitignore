@@ -38,3 +38,6 @@ web-build/
 *.gguf
 *.bin
 .qvac/
+
+# Bundle del worker de QVAC: lo regenera `expo prebuild` desde qvac.config.json.
+apps/mobile/qvac/

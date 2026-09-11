@@ -49,6 +49,14 @@
           "backgroundColor": "#05100B",
           "imageWidth": 200
         }
+      ],
+      "@qvac/sdk/expo-plugin",
+      [
+        "expo-build-properties",
+        {
+          "comment": "useLegacyPackaging extrae los .so al instalar. Sin esto SoLoader lee las librerías comprimidas del APK y tiene que resolver a mano las dependencias de libbare-kit.so (QVAC), que necesita la librería pública del sistema libnativehelper.so. SoLoader no la encuentra, libappmodules.so no carga y la app arranca sin TurboModules ('PlatformConstants could not be found', pantalla negra).",
+          "android": { "useLegacyPackaging": true }
+        }
       ]
     ],
     "experiments": {

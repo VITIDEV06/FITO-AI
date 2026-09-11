@@ -1,134 +1,70 @@
-import { useEffect, useState } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { ActivityIndicator, Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  AudioModule,
-  RecordingPresets,
-  useAudioPlayer,
-  useAudioRecorder,
-  useAudioRecorderState,
-} from 'expo-audio';
-import type { Analisis } from '@fitoai/core';
 import { BotonPrincipal, BotonSecundario, Card, Texto } from '../../src/components/base';
 import { Cabecera } from '../../src/components/Cabecera';
 import { colores, espacio, radio } from '../../src/theme/tokens';
-import { hablar, resumirParaVoz, transcribirArchivo } from '../../src/services/voz';
-import { analizar } from '../../src/inference/registro';
-import { guardarObservacion } from '../../src/storage/observaciones';
+import { useAsistenteVoz, type EstadoVoz } from '../../src/hooks/useAsistenteVoz';
 import { actualizarBorrador } from '../../src/services/borrador';
-
-type Fase = 'listo' | 'grabando' | 'transcribiendo' | 'analizando' | 'respondido' | 'sin-voz';
 
 /**
  * Asistente de voz. Sigue el wireframe 05-asistente-voz.
  *
  * Cadena completa y 100 % local:
- *   micrófono -> Whisper (QVAC) -> motor de inferencia -> TTS (QVAC) -> audio
+ *   micrófono -> Whisper (QVAC) -> MotorInferencia -> TTS (QVAC) -> audio
  *
- * Si el modelo de voz no está en el teléfono, la pantalla lo dice con claridad
- * y ofrece escribir. No hay ningún camino que llame a un servicio en la nube.
+ * Nada de esto sale del teléfono. Si QVAC no está disponible, el estado pasa a
+ * 'fallback' y la pantalla ofrece escribir: la app sigue siendo útil en Nivel 0.
  */
+
+const TEXTO_ESTADO: Record<EstadoVoz, string> = {
+  inactivo: 'Mantén pulsado para hablar',
+  preparando: 'Preparando el modelo de voz…',
+  escuchando: 'Escuchando…',
+  transcribiendo: 'Entendiendo lo que dijiste…',
+  respondiendo: 'Analizando en tu teléfono…',
+  reproduciendo: 'Reproduciendo la respuesta…',
+  error: 'Algo salió mal',
+  fallback: 'La voz no está disponible',
+};
+
 export default function Asistente() {
-  const grabadora = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const estadoGrabadora = useAudioRecorderState(grabadora);
-  const reproductor = useAudioPlayer();
+  const voz = useAsistenteVoz();
+  const pulso = useRef(new Animated.Value(1)).current;
 
-  const [fase, setFase] = useState<Fase>('listo');
-  const [transcripcion, setTranscripcion] = useState('');
-  const [analisis, setAnalisis] = useState<Analisis | null>(null);
-  const [respuesta, setRespuesta] = useState('');
-  const [audioUri, setAudioUri] = useState<string | null>(null);
-  const [pulso] = useState(new Animated.Value(1));
+  const ocupado =
+    voz.estado === 'preparando' ||
+    voz.estado === 'transcribiendo' ||
+    voz.estado === 'respondiendo';
+  const grabando = voz.estado === 'escuchando';
+  const inutilizable = voz.estado === 'fallback';
 
+  // Latido mientras graba: retroalimentación clara sin depender de texto.
   useEffect(() => {
-    void (async () => {
-      const permiso = await AudioModule.requestRecordingPermissionsAsync();
-      if (!permiso.granted) setFase('sin-voz');
-    })();
-  }, []);
-
-  // Latido del micrófono mientras graba: retroalimentación clara sin texto.
-  useEffect(() => {
-    if (fase !== 'grabando') {
+    if (!grabando) {
       pulso.setValue(1);
       return;
     }
     const animacion = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulso, { toValue: 1.15, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulso, { toValue: 1.14, duration: 600, useNativeDriver: true }),
         Animated.timing(pulso, { toValue: 1, duration: 600, useNativeDriver: true }),
       ]),
     );
     animacion.start();
     return () => animacion.stop();
-  }, [fase, pulso]);
-
-  const empezar = async () => {
-    setTranscripcion('');
-    setRespuesta('');
-    setAnalisis(null);
-    setAudioUri(null);
-    await grabadora.prepareToRecordAsync();
-    grabadora.record();
-    setFase('grabando');
-  };
-
-  const detener = async () => {
-    await grabadora.stop();
-    const uri = grabadora.uri;
-    if (!uri) {
-      setFase('listo');
-      return;
-    }
-
-    setFase('transcribiendo');
-    const texto = await transcribirArchivo(uri);
-
-    if (!texto) {
-      setFase('sin-voz');
-      return;
-    }
-
-    setTranscripcion(texto);
-    setFase('analizando');
-
-    const { analisis: resultado, nivel } = await analizar({ descripcion: texto });
-    setAnalisis(resultado);
-
-    const resumen = resumirParaVoz(
-      resultado.cultivo,
-      resultado.posiblesCausas.map((c) => c.descripcion),
-      resultado.proximosPasos,
-    );
-    setRespuesta(resumen);
-
-    const vozRespuesta = await hablar(resumen);
-    setAudioUri(vozRespuesta.audioUri);
-    setFase('respondido');
-
-    await guardarObservacion({
-      descripcion: texto,
-      cultivo: resultado.cultivo,
-      fotoUri: null,
-      transcripcion: texto,
-      origen: 'voz',
-      analisis: resultado,
-      nivelMotor: nivel,
-      notas: null,
-    });
-  };
-
-  const escuchar = () => {
-    if (!audioUri) return;
-    reproductor.replace({ uri: audioUri });
-    reproductor.play();
-  };
+  }, [grabando, pulso]);
 
   const verResultado = () => {
-    if (!analisis) return;
-    actualizarBorrador({ descripcion: transcripcion, analisis, origen: 'voz', transcripcion });
+    if (!voz.analisis) return;
+    actualizarBorrador({
+      descripcion: voz.transcripcion,
+      analisis: voz.analisis,
+      origen: 'voz',
+      transcripcion: voz.transcripcion,
+    });
     router.replace('/observation/result');
   };
 
@@ -150,62 +86,88 @@ export default function Asistente() {
           <Animated.View style={{ transform: [{ scale: pulso }] }}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={fase === 'grabando' ? 'Detener grabación' : 'Empezar a hablar'}
-              accessibilityState={{ busy: fase === 'transcribiendo' || fase === 'analizando' }}
-              disabled={fase === 'transcribiendo' || fase === 'analizando' || fase === 'sin-voz'}
-              onPress={fase === 'grabando' ? detener : empezar}
-              style={[estilos.micro, fase === 'grabando' && estilos.microActivo]}
+              accessibilityLabel={grabando ? 'Suelta para enviar' : 'Mantén pulsado para hablar'}
+              accessibilityState={{ busy: ocupado, disabled: inutilizable }}
+              disabled={ocupado || inutilizable}
+              // Mantener pulsado es lo natural en campo; soltar envía.
+              onPressIn={() => void voz.empezar()}
+              onPressOut={() => void voz.detener()}
+              style={[
+                estilos.micro,
+                grabando && estilos.microActivo,
+                (ocupado || inutilizable) && { opacity: 0.45 },
+              ]}
             >
-              <Ionicons
-                name={fase === 'grabando' ? 'stop' : 'mic'}
-                size={52}
-                color={fase === 'grabando' ? colores.fondo : colores.verde}
-              />
+              {ocupado ? (
+                <ActivityIndicator size="large" color={colores.verde} />
+              ) : (
+                <Ionicons
+                  name={grabando ? 'radio-button-on' : inutilizable ? 'mic-off' : 'mic'}
+                  size={52}
+                  color={grabando ? colores.fondo : colores.verde}
+                />
+              )}
             </Pressable>
           </Animated.View>
 
           <Texto variante="cuerpoFuerte" centrado color={colores.textoSuave} style={{ marginTop: espacio.lg }}>
-            {
-              {
-                listo: 'Toca para hablar',
-                grabando: `Grabando… ${Math.round((estadoGrabadora.durationMillis ?? 0) / 1000)} s`,
-                transcribiendo: 'Entendiendo lo que dijiste…',
-                analizando: 'Analizando en tu teléfono…',
-                respondido: 'Toca para hablar otra vez',
-                'sin-voz': 'La voz no está disponible',
-              }[fase]
-            }
+            {grabando ? `Escuchando… ${voz.segundos} s` : TEXTO_ESTADO[voz.estado]}
           </Texto>
+
+          {voz.progreso ? (
+            <View style={estilos.progreso}>
+              <View style={estilos.barra}>
+                <View style={[estilos.barraRelleno, { width: `${voz.progreso.porcentaje}%` }]} />
+              </View>
+              <Texto variante="pequeno" color={colores.cian} style={{ marginTop: espacio.xs }}>
+                {voz.progreso.etapa} · {Math.round(voz.progreso.porcentaje)}%
+              </Texto>
+            </View>
+          ) : null}
         </View>
 
-        {fase === 'sin-voz' ? (
-          <Card style={{ borderColor: colores.aviso }}>
+        {voz.mensaje ? (
+          <Card style={{ borderColor: voz.estado === 'error' ? colores.peligro : colores.aviso }}>
             <View style={estilos.filaIcono}>
-              <Ionicons name="mic-off" size={20} color={colores.aviso} />
-              <Texto variante="cuerpoFuerte" color={colores.aviso}>
-                El modelo de voz no está en tu teléfono
+              <Ionicons
+                name={voz.estado === 'error' ? 'alert-circle' : 'information-circle'}
+                size={20}
+                color={voz.estado === 'error' ? colores.peligro : colores.aviso}
+              />
+              <Texto
+                variante="cuerpoFuerte"
+                color={voz.estado === 'error' ? colores.peligro : colores.aviso}
+                style={{ flex: 1 }}
+              >
+                {TEXTO_ESTADO[voz.estado]}
               </Texto>
             </View>
             <Texto variante="pequeno" color={colores.textoSuave} style={{ marginTop: espacio.sm }}>
-              Puedes descargarlo desde Estado (ocupa unos 44 MB) o escribir tu observación.
-              FitoIA nunca envía tu voz a internet.
+              {voz.mensaje}
             </Texto>
+
             <View style={{ gap: espacio.sm, marginTop: espacio.md }}>
-              <BotonSecundario
-                titulo="Descargar el modelo de voz"
-                icono={<Ionicons name="cloud-download" size={18} color={colores.verde} />}
-                onPress={() => router.replace('/settings/models')}
-              />
-              <BotonSecundario
-                titulo="Escribir en su lugar"
-                icono={<Ionicons name="create" size={18} color={colores.cian} />}
-                onPress={() => router.replace('/observation')}
-              />
+              {inutilizable ? (
+                <>
+                  <BotonSecundario
+                    titulo="Administrar modelos"
+                    icono={<Ionicons name="cube" size={18} color={colores.cian} />}
+                    onPress={() => router.replace('/settings/models')}
+                  />
+                  <BotonSecundario
+                    titulo="Escribir en su lugar"
+                    icono={<Ionicons name="create" size={18} color={colores.verde} />}
+                    onPress={() => router.replace('/observation')}
+                  />
+                </>
+              ) : (
+                <BotonSecundario titulo="Intentar de nuevo" onPress={voz.reiniciar} />
+              )}
             </View>
           </Card>
         ) : null}
 
-        {transcripcion ? (
+        {voz.transcripcion ? (
           <Card>
             <View style={estilos.filaIcono}>
               <Ionicons name="person" size={16} color={colores.textoTenue} />
@@ -214,40 +176,40 @@ export default function Asistente() {
               </Texto>
             </View>
             <Texto variante="cuerpo" style={{ marginTop: espacio.sm }}>
-              {transcripcion}
+              {voz.transcripcion}
             </Texto>
           </Card>
         ) : null}
 
-        {respuesta ? (
+        {voz.respuesta ? (
           <Card style={{ borderColor: colores.verde }}>
             <View style={estilos.filaIcono}>
               <Ionicons name="leaf" size={16} color={colores.verde} />
               <Texto variante="etiqueta" color={colores.verde}>
-                FITO RESPONDE · IA LOCAL
+                FITO RESPONDE · EN TU TELÉFONO
               </Texto>
             </View>
             <Texto variante="cuerpo" style={{ marginTop: espacio.sm }}>
-              {respuesta}
+              {voz.respuesta}
             </Texto>
           </Card>
         ) : null}
       </ScrollView>
 
-      {fase === 'respondido' ? (
+      {voz.analisis ? (
         <View style={estilos.pie}>
           <View style={{ flexDirection: 'row', gap: espacio.sm }}>
             <BotonSecundario
-              titulo={audioUri ? 'Escuchar' : 'Sin audio'}
+              titulo={voz.puedeReproducir ? 'Escuchar' : 'Sin audio'}
               icono={<Ionicons name="volume-high" size={20} color={colores.cian} />}
-              disabled={!audioUri}
-              onPress={escuchar}
+              disabled={!voz.puedeReproducir || voz.estado === 'reproduciendo'}
+              onPress={voz.reproducir}
               style={{ flex: 1 }}
             />
             <BotonSecundario
               titulo="Hablar otra vez"
               icono={<Ionicons name="mic" size={20} color={colores.verde} />}
-              onPress={empezar}
+              onPress={voz.reiniciar}
               style={{ flex: 1 }}
             />
           </View>
@@ -274,6 +236,15 @@ const estilos = StyleSheet.create({
     justifyContent: 'center',
   },
   microActivo: { backgroundColor: colores.peligro, borderColor: colores.peligro },
+  progreso: { width: '100%', marginTop: espacio.lg, alignItems: 'center' },
+  barra: {
+    width: '100%',
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colores.superficieAlta,
+    overflow: 'hidden',
+  },
+  barraRelleno: { height: '100%', backgroundColor: colores.cian, borderRadius: 4 },
   filaIcono: { flexDirection: 'row', alignItems: 'center', gap: espacio.sm },
   pie: {
     padding: espacio.lg,

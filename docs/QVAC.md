@@ -94,3 +94,56 @@ Instalación: ver [apps/mobile/README.md](../apps/mobile/README.md).
 
 No se acepta inferencia en la nube. Después de descargar los modelos, la app
 debe funcionar en modo avión. Ese es el criterio de aceptación de "offline real".
+
+---
+
+## Hallazgos al integrarlo de verdad (verificados en un vivo V2556, Android 16, arm64, 3,70 GB)
+
+### 1. Los modelos viajan por P2P, no por HTTPS
+
+El descriptor de un modelo es `registry://s3/...` con un `blobCoreKey`, y los
+addons enlazados incluyen `udx-native`, `sodium-native` y `rocksdb-native`: la
+distribución es **Hyperswarm sobre UDP**, no una descarga HTTP.
+
+Consecuencia práctica: en redes que filtran UDP/DHT (WiFi de campus, redes
+corporativas, portales cautivos) el swarm no arranca y el worker de Bare
+**aborta el proceso**:
+
+```text
+F libc: Fatal signal 6 (SIGABRT) in tid (bare-worklet)
+#02 libbare-kit.so (js_callback_s::on_call(...))
+```
+
+No es capturable desde JavaScript: mata la app entera.
+
+**Mitigación adoptada:** `MotorQvacMobile` no descarga nunca. Solo carga modelos
+que ya están en disco, consultando `modeloEstaListo()` contra `model_registry`.
+Descargar es una acción explícita en *Administrar modelos*. Así un fallo de red
+queda confinado a la pantalla donde el usuario lo pidió, en lugar de cerrar la
+app a mitad de una interacción de voz.
+
+### 2. `useLegacyPackaging` es obligatorio
+
+`libbare-kit.so` declara `NEEDED libnativehelper.so` (una librería pública del
+sistema). Sin empaquetado legacy los `.so` van comprimidos dentro del APK,
+SoLoader resuelve las dependencias por su cuenta en vez de delegar en el linker
+de Android, no encuentra `libnativehelper.so`, y `libappmodules.so` no carga.
+Resultado: la app arranca **sin TurboModules** y muere con
+`PlatformConstants could not be found` (pantalla negra).
+
+```json
+["expo-build-properties", { "android": { "useLegacyPackaging": true } }]
+```
+
+### 3. No cargar nada en `inicializar()`
+
+Cargar el LLM al arrancar hacía fallar la inicialización completa en teléfonos
+que sí podían con la voz, tumbando también el Nivel 1. Todo se carga perezoso y
+se libera al salir (`liberarVoz()`), y cargar el LLM libera antes los modelos de
+voz para no tener dos modelos pesados en memoria a la vez.
+
+### 4. Audio a `transcribe`
+
+Los ejemplos del propio SDK pasan la **ruta del fichero** como `audioChunk` y no
+declaran `audio_format`; el addon `bare-ffmpeg` lo decodifica. Es lo que hace la
+app con la grabación `.m4a` de `expo-audio`, quitándole el prefijo `file://`.
